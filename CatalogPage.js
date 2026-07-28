@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useStore } from './StoreContext';
 
 const CATEGORY_MAP = {
@@ -8,9 +8,7 @@ const CATEGORY_MAP = {
 
 export const CatalogPage = ({ products, onSelectProduct }) => {
   const { activeCategory, setActiveCategory, searchQuery, addToCart } = useStore();
-  const [selectedSize, setSelectedSize] = useState('M');
 
-  // Filter products by selected gender, subcategory, and search term
   const filteredProducts = products.filter(item => {
     const matchesGender = activeCategory.gender === 'All' || item.gender === activeCategory.gender;
     const matchesSub = activeCategory.sub === 'All' || item.category === activeCategory.sub;
@@ -21,7 +19,6 @@ export const CatalogPage = ({ products, onSelectProduct }) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
-      
       {/* Category Sidebar */}
       <aside className="w-full md:w-64 flex-shrink-0">
         <div className="bg-gray-50 p-6 rounded-lg sticky top-24">
@@ -75,7 +72,11 @@ export const CatalogPage = ({ products, onSelectProduct }) => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map(product => (
-              <div key={product.id} className="group border border-gray-100 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+              <div 
+                key={product.id} 
+                className="group border border-gray-100 rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-white flex flex-col justify-between"
+              >
+                {/* Clicking Image -> Opens Product Detail Page */}
                 <div 
                   className="aspect-w-3 aspect-h-4 bg-gray-200 overflow-hidden cursor-pointer"
                   onClick={() => onSelectProduct(product)}
@@ -86,19 +87,30 @@ export const CatalogPage = ({ products, onSelectProduct }) => {
                     className="w-full h-72 object-cover object-center group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <div className="p-4">
-                  <p className="text-xs text-gray-400 uppercase tracking-widest">{product.gender} • {product.category}</p>
-                  <h3 
-                    className="font-medium text-gray-900 mt-1 cursor-pointer truncate"
-                    onClick={() => onSelectProduct(product)}
-                  >
-                    {product.title}
-                  </h3>
-                  <p className="text-xs text-gray-500 line-clamp-2 mt-1">{product.description}</p>
-                  <div className="mt-4 flex items-center justify-between">
+
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs text-gray-400 uppercase tracking-widest">{product.gender} • {product.category}</p>
+                    
+                    {/* Clicking Title -> Opens Product Detail Page */}
+                    <h3 
+                      className="font-medium text-gray-900 mt-1 cursor-pointer hover:underline truncate"
+                      onClick={() => onSelectProduct(product)}
+                    >
+                      {product.title}
+                    </h3>
+                    <p className="text-xs text-gray-500 line-clamp-2 mt-1">{product.description}</p>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between pt-2 border-t border-gray-50">
                     <span className="text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
+                    
+                    {/* Separate Button -> Only triggers Add to Cart without opening Product Detail */}
                     <button
-                      onClick={() => addToCart(product, 'M', 'Default', 1)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevents opening Product Detail Page
+                        addToCart(product, product.sizes?.[0] || 'M', product.colors?.[0] || 'Black', 1);
+                      }}
                       className="px-3 py-1.5 text-xs font-semibold text-white bg-black rounded hover:bg-gray-800 transition-colors"
                     >
                       Quick Add
